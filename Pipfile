@@ -9,6 +9,8 @@ pandas = "*"
 matplotlib = "*"
 mlxtend = "*"
 seaborn = "*"
+py-cord = "*"
+python-dotenv = "*"
 
 [dev-packages]
 
