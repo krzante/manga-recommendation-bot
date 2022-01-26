@@ -1,3 +1,5 @@
 .env
-prefixes.json
+*.json
 *.csv
+
+.vscode
