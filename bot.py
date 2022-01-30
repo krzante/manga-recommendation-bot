@@ -100,8 +100,6 @@ async def help_command(ctx):
         > aliases: `recbyleverage`, `rble`, `rle`, `r3`', inline=False)
     embed_var.add_field(name=':four:  Lift Recommendations', value='> `recbylift <MANGA>`\n> Recommend mangas based on the initial manga input via lift.\n \
         > aliases: `recbylift`, `rbli`, `rli`, `r4`', inline=False)
-    embed_var.add_field(name=':five:  Support Recommendations', value='> `recbysupport <MANGA>`\n> Recommend mangas based on the initial manga input via support.\n \
-        > aliases: `recbysupport`, `rbs`, `rs`, `r5`', inline=False)
     
     embed_var.set_footer(text ='Data Analytics Project by Mesina, Yumang & Zante', icon_url='https://www.pikpng.com/pngl/b/28-287145_dogok-discord-emoji-ok-hand-discord-emote-clipart.png')
 
@@ -117,14 +115,9 @@ async def send_manga_rec(ctx, results_arg, via_arg):
     # Test EMbed
     embed_var = discord.Embed(
         colour = discord.Colour.dark_blue(),
-        # description = '> `Genres`: ' + str(manga_dbvar[antecedent]['genre']) + '\n \
-        #     > `Synopsis`: ' + str(manga_dbvar[antecedent]['synopsis'][:150]) + \
-        #     ' [...read more](https://myanimelist.net/manga/' + str(manga_dbvar[antecedent]['id']) + ')'
     )
-    # embed_titlevar = str(antecedent) + '](https://myanimelist.net/manga/'+ str(manga_dbvar[antecedent]['id']) + ')'
-    # embed_var.set_author(name=':blue_book:  ' + str(antecedent) + " recommendations via: " + via_arg)
     
-    #+ " `recommendations via: " + via_arg + '`'
+    # Base manga
     embed_var.add_field(name=':blue_book:  ' + str(antecedent) , \
         value='> `Genres`: ' + str(manga_dbvar[antecedent]['genre']) + '\n \
             > `Synopsis`: ' + str(manga_dbvar[antecedent]['synopsis'][:150]) + \
@@ -150,7 +143,7 @@ async def send_manga_not_found(ctx):
 
 # This is the function that the rec commands will initially call.
 async def setup_recommendations(ctx, manga_arg, method_arg):
-    manga_arg = manga_arg.lower().title()
+    manga_arg = manga_arg.lower() #.title()
     await get_recommendations(ctx, manga_arg, method_arg)
 
 
@@ -159,7 +152,7 @@ async def get_recommendations(ctx, manga_arg, recommend_by_arg):
     global fpgrowth_dfvar
     # fpgrowth_dfvar[fpgrowth_dfvar["antecedents"].apply(lambda x: manga_arg in str(x))].groupby(['antecedents', 'consequents'])[['lift']].max().sort_values(ascending=False,by=recommend_by_arg).head(10).reset_index()
     # fpgrowth_dfvar[fpgrowth_dfvar["antecedents"].apply(lambda x: manga_arg in str(x))].sort_values(ascending=False,by=recommend_by_arg).head(10).reset_index()
-    resultsvar = fpgrowth_dfvar[fpgrowth_dfvar["antecedents"].apply(lambda x: manga_arg in str(x))].groupby(['antecedents', 'consequents'])[[recommend_by_arg]].max().sort_values(ascending=False,by=recommend_by_arg).head(10).reset_index()
+    resultsvar = fpgrowth_dfvar[fpgrowth_dfvar["antecedents"].str.lower().apply(lambda x: manga_arg in str(x))].groupby(['antecedents', 'consequents'])[[recommend_by_arg]].max().sort_values(ascending=False,by=recommend_by_arg).head(10).reset_index()
     resultsvar = resultsvar.to_numpy()
 
     if not resultsvar.size == 0:
@@ -194,9 +187,9 @@ async def recommend_by_lift_command(ctx, *, manga_arg):
 
 
 # Recommend via Support Column in the FPGrowth
-@thredd_bot.command(name='recbysupport', aliases=['rbs', 'rs', 'r5'])
-async def recommend_by_support_command(ctx, *, manga_arg):
-    await setup_recommendations(ctx, manga_arg, 'support')
+@thredd_bot.command(name='hello', aliases=['ello',])
+async def hello_command(ctx, *manga_arg):
+    await ctx.send('{} arguments: {}'.format(len(manga_arg), ', '.join(manga_arg)))
 
 
 thredd_bot.run(getenv("BOT_TOKEN"))  # Running/Activating the Bot
