@@ -37,6 +37,7 @@ def get_manga_db():
     return dbvar
 
 
+rec_types_listvar = ['confidence', 'conviction', 'leverage', 'lift']
 fpgrowth_dfvar = pd.read_csv('./data/manga_fpgrowth.csv')
 manga_dbvar = get_manga_db()
 
@@ -91,15 +92,13 @@ async def help_command(ctx):
     embed_var.add_field(name=':exclamation:  Change Bot Prefix', value='> `changeprefix <NEW PREFIX>`\n> Set the coin to fiat conversion currency. Needs Administrator role.\n \
         > aliases: `changeprefix`, `cp`', inline=False)
     # \u200B is empty https://stackoverflow.com/questions/50373020/line-separator-break-in-discord-embded
-    embed_var.add_field(name='\u200B', value='**----- RECOMMENDATION TYPES ----------------------------**', inline=False)
-    embed_var.add_field(name=':one:  Confidence Recommendations', value='> `recbyconfidence <MANGA>`\n> Recommend mangas based on the initial manga input via confidence.\n \
-        > aliases: `recbyconfidence`, `rbcf`, `rcf`, `r1`', inline=False)
-    embed_var.add_field(name=':two:  Conviction Recommendations', value='> `recbyconviction <MANGA>`\n> Recommend mangas based on the initial manga input via conviction.\n \
-        > aliases: `recbyconviction`, `rbcv`, `rcv`, `r2`', inline=False)
-    embed_var.add_field(name=':three:  Leverage Recommendations', value='> `recbyleverage <MANGA>`\n> Recommend mangas based on the initial manga input via leverage.\n \
-        > aliases: `recbyleverage`, `rble`, `rle`, `r3`', inline=False)
-    embed_var.add_field(name=':four:  Lift Recommendations', value='> `recbylift <MANGA>`\n> Recommend mangas based on the initial manga input via lift.\n \
-        > aliases: `recbylift`, `rbli`, `rli`, `r4`', inline=False)
+    embed_var.add_field(name=':one:  Recommend With Full Manga Title', value='> `recbyfull "<full manga title>" <recommendation type>`\n> aliases: `rf`, `rfull`, `r1`.\n \
+        > sample: tr!recbyfull "Naruto" confidence', inline=False)
+    embed_var.add_field(name=':two:  Recommend With Partial Manga Title', value='> `recbypartial "<partial manga title" <recommendation type>`\n> aliases: `rp`, `rpartial`, `r2`.\n \
+        > sample: tr!recbypartial "Naru" confidence', inline=False)
+    embed_var.add_field(name='**----- RECOMMENDATION TYPES ----------------------------**', value='> `Confidence`\n> `Conviction`\n> `Leverage`\n> `Lift`\n \
+        > [Read more](https://michael.hahsler.net/research/recommender/associationrules.html)', inline=False)
+
     
     embed_var.set_footer(text ='Data Analytics Project by Mesina, Yumang & Zante', icon_url='https://www.pikpng.com/pngl/b/28-287145_dogok-discord-emoji-ok-hand-discord-emote-clipart.png')
 
@@ -125,12 +124,16 @@ async def send_manga_rec(ctx, results_arg, via_arg):
     )
     embed_var.add_field(name='\u200B', value='**----- RECOMMENDATIONS VIA ' + via_arg.upper() + '----------------------------**', inline=False)
 
+    i = 0
     for manga in results_arg:
+        if i >= 10:
+            break
         namevar = ':arrow_right:  ' + str(manga[1])  #numbers[i] +'  '+ manga[2]
         valuevar = '> `Genres`: ' + str(manga_dbvar[manga[1]]['genre']) +'\n\
             > `Synopsis`: ' + str(manga_dbvar[manga[1]]['synopsis'][:150]) + \
             ' [...read more](https://myanimelist.net/manga/' + str(manga_dbvar[manga[1]]['id']) + ')'
         embed_var.add_field(name=namevar, value=valuevar, inline=False)
+        i += 1
     embed_var.set_footer(text ='Data Analytics Project by Mesina, Yumang & Zante', icon_url='https://www.pikpng.com/pngl/b/28-287145_dogok-discord-emoji-ok-hand-discord-emote-clipart.png')
     await ctx.channel.send(embed=embed_var)
 
@@ -142,17 +145,22 @@ async def send_manga_not_found(ctx):
 
 
 # This is the function that the rec commands will initially call.
-async def setup_recommendations(ctx, manga_arg, method_arg):
+async def setup_recommendations(ctx, manga_arg, method_arg, full_title_arg):
     manga_arg = manga_arg.lower() #.title()
-    await get_recommendations(ctx, manga_arg, method_arg)
+    await get_recommendations(ctx, manga_arg, method_arg, full_title_arg)
 
 
 # Function to get the list of mangas to recommend based on the manga_arg
-async def get_recommendations(ctx, manga_arg, recommend_by_arg):
+async def get_recommendations(ctx, manga_arg, recommend_by_arg, full_title_arg):
     global fpgrowth_dfvar
+    print(manga_arg)
     # fpgrowth_dfvar[fpgrowth_dfvar["antecedents"].apply(lambda x: manga_arg in str(x))].groupby(['antecedents', 'consequents'])[['lift']].max().sort_values(ascending=False,by=recommend_by_arg).head(10).reset_index()
     # fpgrowth_dfvar[fpgrowth_dfvar["antecedents"].apply(lambda x: manga_arg in str(x))].sort_values(ascending=False,by=recommend_by_arg).head(10).reset_index()
-    resultsvar = fpgrowth_dfvar[fpgrowth_dfvar["antecedents"].str.lower().apply(lambda x: manga_arg in str(x))].groupby(['antecedents', 'consequents'])[[recommend_by_arg]].max().sort_values(ascending=False,by=recommend_by_arg).head(10).reset_index()
+    resultsvar = fpgrowth_dfvar[fpgrowth_dfvar["antecedents"].str.lower().apply(lambda x: manga_arg in str(x))].groupby(['antecedents', 'consequents'])[[recommend_by_arg]].max().sort_values(ascending=False,by=recommend_by_arg).reset_index()
+    
+    if full_title_arg:
+        resultsvar = resultsvar.loc[resultsvar['antecedents'].str.lower() == manga_arg]
+    
     resultsvar = resultsvar.to_numpy()
 
     if not resultsvar.size == 0:
@@ -162,28 +170,34 @@ async def get_recommendations(ctx, manga_arg, recommend_by_arg):
         await send_manga_not_found(ctx)
 
 
+# Function to check if the user's input contains more than 2 arguments
+def check_args_num(args):
+    if len(args) == 2:
+        if args[1] in rec_types_listvar:
+            return True
+    return False
+
+
+
 # Recommend via Confidence in the FPGrowth
-@thredd_bot.command(name='recbyconfidence', aliases=['rbcf', 'rcf', 'r1'])
-async def recommend_by_lift_command(ctx, *, manga_arg):
-    await setup_recommendations(ctx, manga_arg, 'confidence')
+@thredd_bot.command(name='recbyfull', aliases=['rf', 'rfull', 'r1'])
+async def recommend_by_full_command(ctx, *args):
+    args = list(args)
+    args = [x.lower() for x in args]
+    if (check_args_num(args)):
+        await get_recommendations(ctx, args[0], args[1], True)
+    else:
+        await ctx.send('To many/few arguments passed')
+    
 
-
-# Recommend via conviction in the FPGrowth
-@thredd_bot.command(name='recbyconviction', aliases=['rbcv', 'rcv', 'r2'])
-async def recommend_by_lift_command(ctx, *, manga_arg):
-    await setup_recommendations(ctx, manga_arg, 'conviction')
-
-
-# Recommend via leverage in the FPGrowth
-@thredd_bot.command(name='recbyleverage', aliases=['rble', 'rle', 'r3'])
-async def recommend_by_lift_command(ctx, *, manga_arg):
-    await setup_recommendations(ctx, manga_arg, 'leverage')
-
-
-# Recommend via Lift Column in the FPGrowth
-@thredd_bot.command(name='recbylift', aliases=['rbli', 'rli', 'r4'])
-async def recommend_by_lift_command(ctx, *, manga_arg):
-    await setup_recommendations(ctx, manga_arg, 'lift')
+@thredd_bot.command(name='recbypartial', aliases=['rp', 'rpartial', 'r2'])
+async def recommend_by_full_command(ctx, *args):
+    args = list(args)
+    args = [x.lower() for x in args] # Converting the list to all lowercase https://www.delftstack.com/howto/python/python-lowercase-list/
+    if (check_args_num(args)):
+        await get_recommendations(ctx, args[0], args[1], False)
+    else:
+        await ctx.send('To many/few arguments passed')
 
 
 # Recommend via Support Column in the FPGrowth
