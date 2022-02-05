@@ -88,14 +88,14 @@ async def help_command(ctx):
     embed_var = discord.Embed(
         colour = discord.Colour.dark_blue()
     )
-    embed_var.set_author(name='Crypto Bot Commands')
-    embed_var.add_field(name=':exclamation:  Change Bot Prefix', value='> `changeprefix <NEW PREFIX>`\n> Set the coin to fiat conversion currency. Needs Administrator role.\n \
-        > aliases: `changeprefix`, `cp`', inline=False)
+    embed_var.set_author(name='Thredd Bot Commands')
+    embed_var.add_field(name=':exclamation:  Change Bot Prefix', value='> `changeprefix <NEW PREFIX>`\n> Change the bot\'s prefix. Needs Administrator role.\n \
+        > aliases: `changeprefix`, `cp`\n> \n> `Sample:`\n> tr!changeprefix !', inline=False)
     # \u200B is empty https://stackoverflow.com/questions/50373020/line-separator-break-in-discord-embded
-    embed_var.add_field(name=':one:  Recommend With Full Manga Title', value='> `recbyfull "<full manga title>" <recommendation type>`\n> aliases: `rf`, `rfull`, `r1`.\n \
-        > sample: tr!recbyfull "Naruto" confidence', inline=False)
-    embed_var.add_field(name=':two:  Recommend With Partial Manga Title', value='> `recbypartial "<partial manga title" <recommendation type>`\n> aliases: `rp`, `rpartial`, `r2`.\n \
-        > sample: tr!recbypartial "Naru" confidence', inline=False)
+    embed_var.add_field(name=':one:  Recommend With Full Manga Title', value='> `recbyfull "<full manga title>" <recommendation type>`\n> aliases: `rf`, `rfull`, `r1`.\n> \n \
+        > `Samples:`\n> tr!recbyfull "Slam Dunk" lift\n> tr!r1 "nisekoi" leverage', inline=False)
+    embed_var.add_field(name=':two:  Recommend With Partial Manga Title', value='> `recbypartial "<partial manga title>" <recommendation type>`\n> aliases: `rp`, `rpartial`, `r2`.\n> \n \
+        > `Samples:`\n> tr!recbypartial "Slam" lift\n> tr!r2 "nise" leverage', inline=False)
     embed_var.add_field(name='**----- RECOMMENDATION TYPES ----------------------------**', value='> `Confidence`\n> `Conviction`\n> `Leverage`\n> `Lift`\n \
         > [Read more](https://michael.hahsler.net/research/recommender/associationrules.html)', inline=False)
 
@@ -153,7 +153,7 @@ async def setup_recommendations(ctx, manga_arg, method_arg, full_title_arg):
 # Function to get the list of mangas to recommend based on the manga_arg
 async def get_recommendations(ctx, manga_arg, recommend_by_arg, full_title_arg):
     global fpgrowth_dfvar
-    print(manga_arg)
+    # print(manga_arg)
     # fpgrowth_dfvar[fpgrowth_dfvar["antecedents"].apply(lambda x: manga_arg in str(x))].groupby(['antecedents', 'consequents'])[['lift']].max().sort_values(ascending=False,by=recommend_by_arg).head(10).reset_index()
     # fpgrowth_dfvar[fpgrowth_dfvar["antecedents"].apply(lambda x: manga_arg in str(x))].sort_values(ascending=False,by=recommend_by_arg).head(10).reset_index()
     resultsvar = fpgrowth_dfvar[fpgrowth_dfvar["antecedents"].str.lower().apply(lambda x: manga_arg in str(x))].groupby(['antecedents', 'consequents'])[[recommend_by_arg]].max().sort_values(ascending=False,by=recommend_by_arg).reset_index()
