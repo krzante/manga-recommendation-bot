@@ -11,6 +11,7 @@ mlxtend = "*"
 seaborn = "*"
 py-cord = "*"
 python-dotenv = "*"
+aiohttp = "*"
 
 [dev-packages]
 
