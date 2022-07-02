@@ -100,7 +100,7 @@ async def help_command(ctx):
         > [Read more](https://michael.hahsler.net/research/recommender/associationrules.html)', inline=False)
 
     
-    embed_var.set_footer(text ='Data Analytics Project by Mesina, Yumang & Zante', icon_url='https://www.pikpng.com/pngl/b/28-287145_dogok-discord-emoji-ok-hand-discord-emote-clipart.png')
+    embed_var.set_footer(text ='AI Project by Getigan, Mesina, Yumang & Zante', icon_url='https://www.pikpng.com/pngl/b/28-287145_dogok-discord-emoji-ok-hand-discord-emote-clipart.png')
 
     await ctx.channel.send(embed=embed_var)
 
@@ -134,7 +134,7 @@ async def send_manga_rec(ctx, results_arg, via_arg):
             ' [...read more](https://myanimelist.net/manga/' + str(manga_dbvar[manga[1]]['id']) + ')'
         embed_var.add_field(name=namevar, value=valuevar, inline=False)
         i += 1
-    embed_var.set_footer(text ='Data Analytics Project by Mesina, Yumang & Zante', icon_url='https://www.pikpng.com/pngl/b/28-287145_dogok-discord-emoji-ok-hand-discord-emote-clipart.png')
+    embed_var.set_footer(text ='AI Project by Getigan, Mesina, Yumang & Zante', icon_url='https://www.pikpng.com/pngl/b/28-287145_dogok-discord-emoji-ok-hand-discord-emote-clipart.png')
     await ctx.channel.send(embed=embed_var)
 
 
