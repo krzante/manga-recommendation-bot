@@ -57,7 +57,7 @@
                 "sha256:fe60131d21b31fd1a14bd43e6bb88256f69dfc3188b3a89d736d6c71ed43ec95"
             ],
             "index": "pypi",
-            "version": "==3.7.4.post0"
+            "version": "~>3.7.4.post0"
         },
         "async-timeout": {
             "hashes": [
@@ -113,7 +113,7 @@
                 "sha256:f21f109b3c7ff9d95f8387f752d0d9c34a02aa2f7060c2135f465da0e5160ff6"
             ],
             "markers": "python_version >= '3.6'",
-            "version": "==1.1.0"
+            "version": "~>1.2.0"
         },
         "kiwisolver": {
             "hashes": [
